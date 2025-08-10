@@ -4,3 +4,5 @@ KnowIt, Swift ve UIKit kullanılarak MVVM mimarisiyle ve storyboard kullanılmad
 
 - Zorluk Seçimi: Easy, Medium, Hard seçenekleri ile quiz zorluk seviyesi belirlenebilir.
 - MVVM Mimari: View ve iş mantığı (ViewModel) temiz bir şekilde ayrılmıştır.
+- 
+[Ekran Görüntüsü](Screenshots/ss1.png)
