@@ -6,6 +6,9 @@ KnowIt, Swift ve UIKit kullanılarak MVVM mimarisiyle ve storyboard kullanılmad
 - MVVM Mimari: View ve iş mantığı (ViewModel) temiz bir şekilde ayrılmıştır.
 
 
-<img src="Screenshots/ss1.png" alt="Ekran Görüntüsü" width="300" />
-<img src="Screenshots/ss2.png" alt="Ekran Görüntüsü" width="300" />
-<img src="Screenshots/ss3.png" alt="Ekran Görüntüsü" width="300" />
+<p float="left">
+  <img src="Screenshots/ss1.png" alt="Ekran Görüntüsü 1" width="300" />
+  <img src="Screenshots/ss2.png" alt="Ekran Görüntüsü 2" width="300" />
+  <img src="Screenshots/ss3.png" alt="Ekran Görüntüsü 3" width="300" />
+</p>
+
