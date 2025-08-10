@@ -52,6 +52,7 @@ class QuizVC: UIViewController {
         setupUI()
         bindViewModel()
         viewModel.loadQuestions(type: "multiple")
+        navigationItem.title = "Quiz"
     }
     
     private func setupUI() {

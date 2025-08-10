@@ -59,8 +59,8 @@ class DifficultyVC: UIViewController {
         
         NSLayoutConstraint.activate([
             stack.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            stack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            stack.widthAnchor.constraint(equalToConstant: 200),
+            stack.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            stack.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
             easyButton.heightAnchor.constraint(equalToConstant: 44),
             mediumButton.heightAnchor.constraint(equalToConstant: 44),
             hardButton.heightAnchor.constraint(equalToConstant: 44),
