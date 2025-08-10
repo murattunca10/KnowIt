@@ -32,8 +32,8 @@ class QuizVM {
         questions.count
     }
 
-    func loadQuestions(amount: Int = 3, category: Int = 0, type: String, completion: (() -> Void)? = nil) {
-        QuestionManager.shared.getQuestions(amount: amount, category: category, difficulty: difficulty, type: type) { [weak self] result in
+    func loadQuestions(amount: Int = 10, category: Int = 0, type: String, completion: (() -> Void)? = nil) {
+        QuestionManager.shared.getQuestions(amount: amount, category: category, difficulty: difficulty.lowercased(), type: type) { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let questions):

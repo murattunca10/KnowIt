@@ -20,11 +20,20 @@ class QuizVC: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
+    private let progressView: UIProgressView = {
+        let progress = UIProgressView(progressViewStyle: .default)
+        progress.trackTintColor = UIColor.white.withAlphaComponent(0.3)
+        progress.progressTintColor = UIColor.systemGreen
+        progress.translatesAutoresizingMaskIntoConstraints = false
+        return progress
+    }()
+    
     private let questionLabel: UILabel = {
         let lbl = UILabel()
-        lbl.font = .systemFont(ofSize: 20, weight: .semibold)
+        lbl.font = .systemFont(ofSize: 24, weight: .bold)
         lbl.numberOfLines = 0
         lbl.textAlignment = .center
+        lbl.textColor = .white
         return lbl
     }()
     
@@ -33,81 +42,123 @@ class QuizVC: UIViewController {
     private let nextButton: UIButton = {
         let btn = UIButton(type: .system)
         btn.setTitle("Next", for: .normal)
-        btn.titleLabel?.font = .boldSystemFont(ofSize: 18)
+        btn.titleLabel?.font = .boldSystemFont(ofSize: 20)
+        btn.backgroundColor = UIColor.systemGreen
+        btn.setTitleColor(.white, for: .normal)
+        btn.layer.cornerRadius = 25
         btn.isHidden = true
+        btn.layer.shadowColor = UIColor.black.cgColor
+        btn.layer.shadowOpacity = 0.25
+        btn.layer.shadowOffset = CGSize(width: 0, height: 5)
+        btn.layer.shadowRadius = 8
         return btn
     }()
     
     private let scoreLabel: UILabel = {
         let lbl = UILabel()
-        lbl.font = .systemFont(ofSize: 16)
+        lbl.font = .systemFont(ofSize: 18, weight: .medium)
         lbl.textAlignment = .center
+        lbl.textColor = UIColor.white.withAlphaComponent(0.9)
         lbl.text = "Score: 0"
         return lbl
     }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        setupGradientBackground()
         setupUI()
         bindViewModel()
         viewModel.loadQuestions(type: "multiple")
         navigationItem.title = "Quiz"
+        navigationController?.navigationBar.titleTextAttributes = [.foregroundColor: UIColor.white]
+        navigationController?.navigationBar.prefersLargeTitles = false
+        navigationController?.navigationBar.tintColor = .white
+    }
+    
+    private func setupGradientBackground() {
+        let gradientLayer = CAGradientLayer()
+        gradientLayer.colors = [
+            UIColor.systemPurple.cgColor,
+            UIColor.systemIndigo.cgColor
+        ]
+        gradientLayer.startPoint = CGPoint(x: 0, y: 0)
+        gradientLayer.endPoint = CGPoint(x: 1, y: 1)
+        gradientLayer.frame = view.bounds
+        view.layer.insertSublayer(gradientLayer, at: 0)
     }
     
     private func setupUI() {
         view.addSubview(scoreLabel)
         scoreLabel.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            scoreLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
-            scoreLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
-        ])
         
         view.addSubview(questionLabel)
         questionLabel.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            questionLabel.topAnchor.constraint(equalTo: scoreLabel.bottomAnchor, constant: 20),
-            questionLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            questionLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
-        ])
         
         for _ in 0..<4 {
             let btn = UIButton(type: .system)
-            btn.titleLabel?.font = .systemFont(ofSize: 18)
-            btn.setTitleColor(.systemBlue, for: .normal)
-            btn.layer.borderWidth = 1
-            btn.layer.borderColor = UIColor.systemBlue.cgColor
-            btn.layer.cornerRadius = 8
-            btn.addTarget(self, action: #selector(answerTapped(_:)), for: .touchUpInside)
+            btn.titleLabel?.font = .systemFont(ofSize: 20, weight: .semibold)
+            btn.setTitleColor(.white, for: .normal)
+            btn.backgroundColor = UIColor.systemIndigo.withAlphaComponent(0.8)
+            btn.layer.cornerRadius = 15
+            btn.layer.shadowColor = UIColor.black.cgColor
+            btn.layer.shadowOpacity = 0.3
+            btn.layer.shadowOffset = CGSize(width: 0, height: 6)
+            btn.layer.shadowRadius = 8
+            
             btn.translatesAutoresizingMaskIntoConstraints = false
+            btn.addTarget(self, action: #selector(answerTapped(_:)), for: .touchUpInside)
+            
             answerButtons.append(btn)
             view.addSubview(btn)
         }
         
-        // Buton layout
-        let spacing: CGFloat = 16
+        view.addSubview(nextButton)
+        nextButton.translatesAutoresizingMaskIntoConstraints = false
+        nextButton.addTarget(self, action: #selector(nextTapped), for: .touchUpInside)
+        
+        view.addSubview(progressView)
+        
+        NSLayoutConstraint.activate([
+            scoreLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 12),
+            scoreLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            
+            questionLabel.topAnchor.constraint(equalTo: scoreLabel.bottomAnchor, constant: 20),
+            questionLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
+            questionLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
+            
+            progressView.topAnchor.constraint(equalTo: scoreLabel.bottomAnchor, constant: 8),
+            progressView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 40),
+            progressView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -40),
+            progressView.heightAnchor.constraint(equalToConstant: 6),
+            
+            questionLabel.topAnchor.constraint(equalTo: progressView.bottomAnchor, constant: 20),
+            questionLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
+            questionLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
+        ])
+        
+        let spacing: CGFloat = 20
+        
         for i in 0..<answerButtons.count {
+            let btn = answerButtons[i]
             NSLayoutConstraint.activate([
-                answerButtons[i].leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 40),
-                answerButtons[i].trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -40),
-                answerButtons[i].heightAnchor.constraint(equalToConstant: 44)
+                btn.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 40),
+                btn.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -40),
+                btn.heightAnchor.constraint(equalToConstant: 54)
             ])
             
             if i == 0 {
-                answerButtons[i].topAnchor.constraint(equalTo: questionLabel.bottomAnchor, constant: 30).isActive = true
+                btn.topAnchor.constraint(equalTo: questionLabel.bottomAnchor, constant: 30).isActive = true
             } else {
-                answerButtons[i].topAnchor.constraint(equalTo: answerButtons[i-1].bottomAnchor, constant: spacing).isActive = true
+                btn.topAnchor.constraint(equalTo: answerButtons[i - 1].bottomAnchor, constant: spacing).isActive = true
             }
         }
         
-        view.addSubview(nextButton)
-        nextButton.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            nextButton.topAnchor.constraint(equalTo: answerButtons.last!.bottomAnchor, constant: 30),
-            nextButton.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+            nextButton.topAnchor.constraint(equalTo: answerButtons.last!.bottomAnchor, constant: 40),
+            nextButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            nextButton.widthAnchor.constraint(equalToConstant: 140),
+            nextButton.heightAnchor.constraint(equalToConstant: 50)
         ])
-        
-        nextButton.addTarget(self, action: #selector(nextTapped), for: .touchUpInside)
     }
     
     private func bindViewModel() {
@@ -116,33 +167,48 @@ class QuizVC: UIViewController {
         }
         
         viewModel.onAnswerChecked = { [weak self] isCorrect, correctAnswer in
-            let alert = UIAlertController(
-                title: isCorrect ? "Correct!" : "Wrong!",
-                message: isCorrect ? "Good job!" : "Correct answer: \(correctAnswer.htmlDecoded)",
-                preferredStyle: .alert
-            )
-            alert.addAction(UIAlertAction(title: "OK", style: .default))
-            self?.present(alert, animated: true)
+            guard let self = self else { return }
             
-            self?.scoreLabel.text = "Score: \(self?.viewModel.score ?? 0)"
-            self?.nextButton.isHidden = false
-            self?.setButtonsEnabled(false)
+            self.highlightAnswerButtons(selectedAnswerCorrect: isCorrect, correctAnswer: correctAnswer)
+            self.scoreLabel.text = "Score: \(self.viewModel.score)"
+            self.nextButton.isHidden = false
+            self.setButtonsEnabled(false)
         }
         
         viewModel.onQuizFinished = { [weak self] in
+            guard let self = self else { return }
             let alert = UIAlertController(
                 title: "Quiz Finished",
-                message: "Your final score is \(self?.viewModel.score ?? 0)",
+                message: "Your final score is \(self.viewModel.score)",
                 preferredStyle: .alert
             )
             alert.addAction(UIAlertAction(title: "Restart", style: .default) { _ in
-                self?.viewModel.loadQuestions(type: "multiple")
+                self.viewModel.loadQuestions(type: "multiple")
             })
-            self?.present(alert, animated: true)
+            self.present(alert, animated: true)
         }
         
         viewModel.onError = { error in
             print("Error: \(error.localizedDescription)")
+        }
+    }
+    
+    private func highlightAnswerButtons(selectedAnswerCorrect: Bool, correctAnswer: String) {
+        for btn in answerButtons {
+            guard let title = btn.title(for: .normal) else { continue }
+            if title == correctAnswer.htmlDecoded {
+                // Doğru cevap yeşil
+                btn.backgroundColor = .systemGreen
+                btn.setTitleColor(.white, for: .normal)
+                btn.layer.shadowColor = UIColor.systemGreen.cgColor
+                btn.layer.shadowOpacity = 0.6
+            } else {
+                // Diğerleri kırmızı veya koyu gri (yanlış)
+                btn.backgroundColor = selectedAnswerCorrect ? UIColor.systemIndigo.withAlphaComponent(0.7) : UIColor.systemRed.withAlphaComponent(0.7)
+                btn.setTitleColor(.white, for: .normal)
+                btn.layer.shadowColor = UIColor.black.cgColor
+                btn.layer.shadowOpacity = 0.3
+            }
         }
     }
     
@@ -151,21 +217,28 @@ class QuizVC: UIViewController {
             questionLabel.text = "No question"
             answerButtons.forEach { $0.isHidden = true }
             nextButton.isHidden = true
+            progressView.progress = 0
             return
         }
-
+        
         questionLabel.text = question.question.htmlDecoded
         let answers = question.allAnswers
-
+        
         for (i, btn) in answerButtons.enumerated() {
             btn.isHidden = false
             btn.setTitle(answers[i].htmlDecoded, for: .normal)
-            btn.backgroundColor = .clear
+            btn.backgroundColor = UIColor.systemIndigo.withAlphaComponent(0.8)
+            btn.setTitleColor(.white, for: .normal)
+            btn.layer.shadowColor = UIColor.black.cgColor
+            btn.layer.shadowOpacity = 0.3
             btn.isEnabled = true
         }
         
         nextButton.isHidden = true
         scoreLabel.text = "Score: \(viewModel.score)"
+        
+        let progress = Float(viewModel.currentIndex) / Float(viewModel.totalQuestions)
+        progressView.setProgress(progress, animated: true)
     }
     
     private func setButtonsEnabled(_ enabled: Bool) {

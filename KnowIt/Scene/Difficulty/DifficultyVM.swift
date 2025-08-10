@@ -18,7 +18,7 @@ class DifficultyVM {
     var onDifficultyChanged: ((String?) -> Void)?
     
     func selectDifficulty(_ level: String) {
-        selectedDifficulty = level.lowercased()
+        selectedDifficulty = level
     }
     
     func resetDifficulty() {
